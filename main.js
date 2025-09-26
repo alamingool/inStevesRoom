@@ -63,7 +63,7 @@ async function sendChatMessage(message) {
     currentUserInput = '';
 
     try {
-        const response = await fetch('https://instevesroom.onrender.com', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message }) });
+        const response = await fetch('https://instevesroom.onrender.com/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message }) });
         const data = await response.json();
         isWaitingForAI = false;
 
