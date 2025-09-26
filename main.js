@@ -1,12 +1,25 @@
 // In main.js
 
 // --- IMPORTS ---
-// ADD the new functions we will create in p5.js
 import { initP5Sketches, updateDisplayText, setCrtEffect, p5Video, setGiveUpState } from './p5.js';
 
 // --- DOM ELEMENTS ---
 const startMenu = document.getElementById('start-menu-overlay');
 const startButton = document.getElementById('start-button');
+// --- NEW LOADING SCREEN ELEMENTS ---
+const loadingOverlay = document.getElementById('loading-overlay');
+const loadingText = document.getElementById('loading-text');
+
+// --- THEMATIC LOADING MESSAGES ---
+const loadingMessages = [
+    "Connecting to Steve's thoughts...",
+    "Calibrating neural link...",
+    "Searching for inspiration...",
+    "Filtering mundane thoughts...",
+    "Reticulating splines...",
+    "Warming up the servers...",
+    "Please wait..."
+];
 
 // --- TIMECODES & STATE ---
 const timecodes = { loops: { menu: { start: 0, end: 4 }, dim: { start: 9.03, end: 19 }, bright: { start: 24.03, end: 34 } }, transitions: { intro: { start: 4.03, end: 9, nextState: 'dim' }, dim_to_bright: { start: 19.03, end: 24, nextState: 'bright' }, bright_to_blinding: { start: 34.03, end: 44, nextState: 'collapse' }, collapse: { start: 44.03, end: 50, nextState: 'dim' } } };
@@ -44,18 +57,40 @@ function playTransition(transitionName) {
 
 // --- AI Communication Logic ---
 async function sendChatMessage(message) {
-    if (!message.trim()) return;
+    if (!message.trim() || isWaitingForAI) return;
 
-    // --- NEW "GIVE UP" LOGIC ---
-    if (message.toLowerCase().includes('give up')) {
-        giveUpIntensity++; // Escalate the intensity
-        console.log(`'Give Up' detected. Intensity is now ${giveUpIntensity}`);
-    } else {
-        giveUpIntensity = 0; // Reset if the user says anything else
-    }
-    // Tell p5.js the current intensity so it knows to shake Steve's text
-    setGiveUpState(giveUpIntensity);
+    // --- NEW LOADING SCREEN LOGIC ---
+    let loadingTimer;
+    let messageInterval;
+
+    // A helper to clean up timers and hide the screen
+    const hideLoadingScreen = () => {
+        clearTimeout(loadingTimer);
+        clearInterval(messageInterval);
+        loadingOverlay.classList.add('hidden');
+    };
+
+    // Set a timer. If fetch takes longer than 1.5s, show the loading screen.
+    loadingTimer = setTimeout(() => {
+        let msgIndex = 0;
+        loadingText.textContent = loadingMessages[msgIndex];
+        loadingOverlay.classList.remove('hidden');
+
+        // Start cycling through the messages
+        messageInterval = setInterval(() => {
+            msgIndex = (msgIndex + 1) % loadingMessages.length;
+            loadingText.textContent = loadingMessages[msgIndex];
+        }, 2500);
+    }, 1500); // 1.5 second delay
+
     // --- END NEW LOGIC ---
+
+    if (message.toLowerCase().includes('give up')) {
+        giveUpIntensity++;
+    } else {
+        giveUpIntensity = 0;
+    }
+    setGiveUpState(giveUpIntensity);
 
     isDialogueActive = true;
     isWaitingForAI = true;
@@ -65,24 +100,23 @@ async function sendChatMessage(message) {
     try {
         const response = await fetch('https://instevesroom.onrender.com/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message }) });
         const data = await response.json();
-        isWaitingForAI = false;
-
-        console.log('AI Response Data:', data);
+        
         updateDisplayText({ steve: data.dialogue }, () => {
-            console.log("main.js: Dialogue unlocked by callback.");
             isDialogueActive = false;
             needsClearOnNextKey = true;
         });
-
 
         handleAIResponse(data.visualState);
     } catch (error) {
         console.error("Error communicating with the server:", error);
         updateDisplayText({ steve: "System: Could not connect to Steve's thoughts..." });
-        isDialogueActive = false; // Unlock on error
-        needsClearOnNextKey = true; // Also set flag on error
+        isDialogueActive = false;
+        needsClearOnNextKey = true;
+    } finally {
         isWaitingForAI = false;
+        hideLoadingScreen(); // This runs on success OR error, ensuring the screen always hides.
     }
+
 }
 
 function handleAIResponse(visualState) {

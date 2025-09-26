@@ -93,3 +93,36 @@ body {
     background-color: #fff;
     color: #000;
 }
+
+/* --- Loading Screen Styles --- */
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.85); /* Dark, but not fully black */
+    z-index: 200; /* On top of everything else */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #ccc;
+    font-family: 'IBM Plex Mono', monospace;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}
+
+/* Use the same hidden class to control visibility */
+#loading-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loading-content {
+    text-align: center;
+}
+
+#loading-text {
+    font-size: 1.2rem;
+    color: #fff;
+}
