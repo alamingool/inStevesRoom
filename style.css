@@ -126,3 +126,25 @@ body {
     font-size: 1.2rem;
     color: #fff;
 }
+
+/* --- Mute Toggle Styles --- */
+#mute-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 250; /* On top of the UI canvas */
+    padding: 8px 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.9rem;
+    color: #ccc;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid #ccc;
+    cursor: pointer;
+    user-select: none; /* Prevents text selection on double click */
+    transition: background-color 0.3s;
+}
+
+#mute-toggle:hover {
+    background-color: #fff;
+    color: #000;
+}

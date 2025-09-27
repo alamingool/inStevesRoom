@@ -75,7 +75,7 @@ export function updateDisplayText(texts, callback = null) {
 const videoSketch = (p) => {
     let crtShader;
 
-    function videoReady() { console.log("p5.js reports video is ready."); p5Video.volume(100); p5Video.noLoop(); p5Video.hide(); window.onP5VideoReady(); }
+    function videoReady() { console.log("p5.js reports video is ready."); p5Video.volume(0); p5Video.noLoop(); p5Video.hide(); window.onP5VideoReady(); }
     p.preload = () => { crtShader = p.createShader(crtVert, crtFrag); p5Video = p.createVideo('/room.webm', videoReady); };
     p.setup = () => { p.createCanvas(p.windowWidth, p.windowHeight, p.WEBGL); };
 

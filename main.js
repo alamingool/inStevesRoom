@@ -238,12 +238,18 @@ function onAssetsReady() {
     setLoopingState('menu'); // Play the silent video loop behind the menu
 }
 
-// The button transitions from the menu to the main experience.
+// The button now handles the transition from the menu to the main experience.
 startButton.addEventListener('click', () => {
     if (isExperienceStarted) return;
     isExperienceStarted = true;
 
     console.log("Starting experience from menu.");
+
+    // --- ADD THIS LINE TO UNMUTE THE AUDIO ---
+    if (p5Video) {
+        p5Video.volume(0.7); // Unmute the video to 70% volume (1 is 100%)
+    }
+    // ------------------------------------------
 
     // Fade out the menu overlay
     startMenu.classList.add('hidden');
@@ -251,9 +257,25 @@ startButton.addEventListener('click', () => {
     // Begin the intro transition
     playTransition('intro');
 
-    // Display the first line of dialogue at the correct time
+    // Display the first line of dialogue at the correct time during the intro
     setTimeout(() => updateDisplayText({ steve: '...(sigh)' }), 5500);
 });
+
+// --- MUTE TOGGLE LOGIC ---
+const muteToggle = document.getElementById('mute-toggle');
+if (muteToggle) {
+    muteToggle.addEventListener('click', () => {
+        if (p5Video) {
+            if (p5Video.volume() > 0) {
+                p5Video.volume(0); // Mute it
+                muteToggle.textContent = 'Unmute';
+            } else {
+                p5Video.volume(0.7); // Unmute it
+                muteToggle.textContent = 'Mute';
+            }
+        }
+    });
+}
 
 // Final call to initialize p5, using our onAssetsReady callback.
 initP5Sketches(
